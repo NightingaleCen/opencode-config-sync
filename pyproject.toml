@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "opencode-config-sync"
+version = "0.1.0"
+description = "Sync OpenCode configuration across machines via a private GitHub repository"
+requires-python = ">=3.8"
+dependencies = [
+    "gitpython>=3.1.0",
+    "click>=8.0.0",
+    "rich>=13.0.0",
+]
+
+[project.scripts]
+opencode-sync = "opencode_sync.cli:main"
+ocs = "opencode_sync.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/opencode_sync"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
