@@ -13,7 +13,7 @@ def init_repo(repo_url: str) -> git.Repo:
     ensure_dir(LOCAL_REPO_DIR.parent)
     if (LOCAL_REPO_DIR / ".git").exists():
         return git.Repo(LOCAL_REPO_DIR)
-    return git.Repo.clone_from(repo_url, LOCAL_REPO_DIR, env={"GIT_SSH_COMMAND": "ssh -o BatchMode=yes"})
+    return git.Repo.clone_from(repo_url, LOCAL_REPO_DIR)
 
 
 def open_repo() -> git.Repo:

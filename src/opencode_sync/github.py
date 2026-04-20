@@ -20,6 +20,18 @@ def gh_authenticated() -> bool:
     return result.returncode == 0
 
 
+def gh_git_protocol() -> str:
+    """Return the git protocol configured in gh ('ssh' or 'https')."""
+    result = subprocess.run(
+        ["gh", "config", "get", "git_protocol"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode == 0 and result.stdout.strip() == "ssh":
+        return "ssh"
+    return "https"
+
+
 def gh_username() -> Optional[str]:
     result = subprocess.run(
         ["gh", "api", "user", "--jq", ".login"],
@@ -32,7 +44,7 @@ def gh_username() -> Optional[str]:
 
 
 def create_private_repo(name: str = "opencode-config") -> tuple[Optional[str], Optional[str]]:
-    """Create a private GitHub repo and return its SSH URL and error message."""
+    """Create a private GitHub repo and return its URL and error message."""
     result = subprocess.run(
         ["gh", "repo", "create", name, "--private"],
         capture_output=True,
@@ -41,14 +53,20 @@ def create_private_repo(name: str = "opencode-config") -> tuple[Optional[str], O
     if result.returncode != 0:
         return None, result.stderr.strip()
     username = gh_username()
+    protocol = gh_git_protocol()
     if username:
-        return f"git@github.com:{username}/{name}.git", None
+        if protocol == "ssh":
+            return f"git@github.com:{username}/{name}.git", None
+        else:
+            return f"https://github.com/{username}/{name}.git", None
     # Parse URL from output as fallback
     url = result.stdout.strip()
     if url.startswith("https://github.com/"):
-        parts = url.replace("https://github.com/", "").strip("/").split("/")
-        if len(parts) == 2:
-            return f"git@github.com:{parts[0]}/{parts[1]}.git", None
+        if protocol == "ssh":
+            parts = url.replace("https://github.com/", "").strip("/").split("/")
+            if len(parts) == 2:
+                return f"git@github.com:{parts[0]}/{parts[1]}.git", None
+        return url, None
     return None, "Could not determine repo URL"
 
 
