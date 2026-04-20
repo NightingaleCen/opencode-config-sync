@@ -466,17 +466,33 @@ For help: https://docs.github.com/en/authentication/connecting-to-github-with-ss
 
 ### Git Commit Messages
 
-Format: `<type>: <description>`
+This project uses [Conventional Commits](https://www.conventionalcommits.org/).
+
+Format: `<type>[optional scope]: <description>`
 
 Types:
-- `feat`: New feature
-- `fix`: Bug fix
+- `feat`: New feature (triggers minor version bump)
+- `fix`: Bug fix (triggers patch version bump)
 - `docs`: Documentation only
-- `refactor`: Code refactoring
-- `test`: Adding tests
-- `chore`: Maintenance tasks
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `test`: Adding or updating tests
+- `chore`: Maintenance (deps, tooling, config)
+- `perf`: Performance improvement
 
-Example: `feat: add interactive conflict resolution`
+Breaking changes: append `!` after type, e.g. `feat!: drop Python 3.8 support`
+
+Examples:
+```
+feat: add interactive conflict resolution
+fix(git_ops): handle detached HEAD state on pull
+docs: update shell alias instructions in AGENTS.md
+chore: bump gitpython to 3.1.46
+feat!: replace --repo flag with --url for clarity
+```
+
+Rules:
+- Description is lowercase, no trailing period
+- Use imperative mood ("add" not "added" or "adds")
 
 ### Release Process
 
@@ -586,5 +602,4 @@ Before implementing, confirm:
 ---
 
 **Last Updated**: 2026-04-20
-**Project Status**: Phase 1 (MVP) - Ready to implement
-**Next Step**: Create `pyproject.toml` and basic project structure
+**Project Status**: Phase 1 (MVP) - Implemented
