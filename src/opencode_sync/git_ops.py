@@ -42,6 +42,15 @@ def fetch(repo: git.Repo) -> None:
     origin.fetch()
 
 
+def remote_has_commits(repo: git.Repo) -> bool:
+    """Return True if the remote has any commits."""
+    try:
+        refs = repo.remotes.origin.refs
+        return len(refs) > 0
+    except Exception:
+        return False
+
+
 def has_remote_changes(repo: git.Repo) -> bool:
     """Return True if remote has commits not in local HEAD."""
     fetch(repo)
@@ -75,12 +84,13 @@ def pull_ff(repo: git.Repo) -> bool:
 def get_diff(repo: git.Repo) -> str:
     """Return unified diff between local working tree and remote HEAD."""
     fetch(repo)
-    try:
-        remote_ref = "origin/main"
-        repo.commit(remote_ref)
-    except git.BadName:
-        remote_ref = "origin/master"
-    return repo.git.diff(remote_ref)
+    for remote_ref in ("origin/main", "origin/master"):
+        try:
+            repo.commit(remote_ref)
+            return repo.git.diff(remote_ref)
+        except git.BadName:
+            continue
+    return ""
 
 
 def create_local_repo(repo_url: str) -> git.Repo:

@@ -51,12 +51,23 @@ def cmd_init(repo_url: Optional[str] = None) -> None:
     console.print(f"Connecting to [bold]{repo_url}[/bold]...")
     try:
         repo = git_ops.init_repo(repo_url)
-        # Remote has content — pull it down
-        console.print("Remote repo has existing config. Pulling...")
-        copy_from_repo(LOCAL_REPO_DIR)
-        console.print("[green]Done![/green] Config pulled from remote.")
+        if git_ops.remote_has_commits(repo):
+            # Remote has content — pull it down
+            console.print("Remote repo has existing config. Pulling...")
+            copy_from_repo(LOCAL_REPO_DIR)
+            console.print("[green]Done![/green] Config pulled from remote.")
+        else:
+            # Cloned successfully but repo is empty — push local config up
+            console.print("Remote repo is empty. Pushing local config...")
+            _stage_local_to_repo()
+            commit = git_ops.commit_all(repo, "Initial config sync")
+            if commit:
+                repo.git.push("--set-upstream", "origin", "HEAD:main")
+                console.print("[green]Done![/green] Local config pushed to remote.")
+            else:
+                console.print("[yellow]No config files found to sync.[/yellow]")
     except Exception:
-        # Remote is empty — push local config up
+        # Remote is empty and clone failed — init fresh local repo
         console.print("Remote repo is empty. Pushing local config...")
         repo = git_ops.create_local_repo(repo_url)
         _stage_local_to_repo()
